@@ -1,0 +1,8 @@
+name = "syncr4-api"
+main = "src/worker.js"
+compatibility_date = "2025-01-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "spirituality-blog-db"
+database_id = "a2b78103-06fc-4869-9358-f09c61705990"
