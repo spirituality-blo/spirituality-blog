@@ -1,101 +1,414 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>管理画面 | Syncr4</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: sans-serif; background: #f5f3ff; padding: 2rem; }
-    h1 { color: #6c63ff; margin-bottom: 2rem; }
-    .form-group { margin-bottom: 1rem; }
-    label { display: block; font-weight: bold; margin-bottom: 0.3rem; }
-    input, textarea { width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
-    textarea { height: 300px; font-family: monospace; }
-    button { background: #6c63ff; color: white; border: none; padding: 0.75rem 2rem; border-radius: 6px; font-size: 1rem; cursor: pointer; margin-top: 1rem; }
-    button:hover { background: #5a52d5; }
-    .msg { margin-top: 1rem; padding: 1rem; border-radius: 6px; }
-    .msg.success { background: #d4edda; color: #155724; }
-    .msg.error { background: #f8d7da; color: #721c24; }
-    .container { max-width: 800px; margin: 0 auto; background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Syncr4 — 管理者ページ</title>
+<style>
+:root {
+  --ink: #111; --ink-2: #444; --ink-3: #888; --ink-4: #bbb;
+  --paper: #fff; --paper-2: #f8f8f6; --paper-3: #f0efec;
+  --rule: #e8e8e4; --accent: #1a1a1a;
+  --green: #1a5c3a; --green-bg: #edf5f0;
+  --red: #991b1b; --red-bg: #fef2f2;
+  --sans: 'Inter', -apple-system, sans-serif;
+  --radius: 8px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--sans); background: #f5f4f1; color: var(--ink); font-size: 15px; line-height: 1.6; -webkit-font-smoothing: antialiased; }
+
+/* Layout */
+.shell { min-height: 100vh; display: flex; flex-direction: column; }
+header {
+  background: var(--ink); color: #fff;
+  padding: 0 2rem; height: 52px;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 10;
+}
+.logo { font-size: 14px; font-weight: 600; letter-spacing: 0.06em; }
+.logo em { opacity: 0.4; font-style: normal; margin-left: 8px; font-size: 12px; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; }
+
+main { flex: 1; max-width: 820px; margin: 0 auto; padding: 2rem 1.5rem 4rem; width: 100%; }
+
+/* Card */
+.card {
+  background: var(--paper); border-radius: 12px;
+  border: 1px solid var(--rule);
+  padding: 1.5rem; margin-bottom: 1.25rem;
+}
+.card-title {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--ink-3);
+  margin-bottom: 1rem;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* Form */
+label { display: block; font-size: 13px; font-weight: 500; color: var(--ink-2); margin-bottom: 5px; }
+input[type=text], input[type=password], textarea, select {
+  width: 100%; border: 1px solid var(--rule); border-radius: var(--radius);
+  padding: 9px 12px; font-family: var(--sans); font-size: 14px;
+  color: var(--ink); background: var(--paper-2);
+  outline: none; transition: border-color 0.15s, background 0.15s;
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--ink-3); background: var(--paper);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+}
+textarea { resize: vertical; }
+.field { margin-bottom: 1rem; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media(max-width:520px){ .grid2 { grid-template-columns: 1fr; } }
+
+/* Buttons */
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 40px; padding: 0 1.25rem; border-radius: var(--radius);
+  font-family: var(--sans); font-size: 14px; font-weight: 500;
+  border: none; cursor: pointer; transition: all 0.15s;
+}
+.btn-primary { background: var(--ink); color: #fff; }
+.btn-primary:hover { background: #333; }
+.btn-primary:disabled { background: var(--ink-4); cursor: not-allowed; }
+.btn-full { width: 100%; justify-content: center; height: 44px; font-size: 15px; }
+
+/* Progress */
+.progress-wrap { display: none; margin-top: 1rem; }
+.progress-wrap.show { display: block; }
+.prog-bar-bg { height: 4px; background: var(--paper-3); border-radius: 99px; overflow: hidden; margin-bottom: 10px; }
+.prog-bar { height: 100%; background: var(--ink); border-radius: 99px; transition: width 0.3s; width: 0; }
+.prog-info { font-size: 13px; color: var(--ink-3); display: flex; justify-content: space-between; }
+.log {
+  margin-top: 10px; background: #18181b; border-radius: 8px;
+  padding: 10px 12px; font-family: 'Courier New', monospace;
+  font-size: 12px; max-height: 140px; overflow-y: auto; line-height: 1.9;
+}
+.log .ok  { color: #86efac; }
+.log .err { color: #fca5a5; }
+.log .inf { color: #7dd3fc; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 1.5rem; right: 1.5rem;
+  padding: 10px 16px; border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  opacity: 0; transform: translateY(8px);
+  transition: all 0.2s; pointer-events: none; z-index: 99;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.success { background: var(--green); color: #fff; }
+.toast.error   { background: var(--red);   color: #fff; }
+
+/* Config tag */
+.cfg-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; background: var(--paper-3); border-radius: 4px;
+  padding: 3px 8px; color: var(--ink-3);
+}
+.cfg-tag.set { background: var(--green-bg); color: var(--green); }
+
+/* Stats */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.stat { background: var(--paper-2); border-radius: 8px; padding: 12px 14px; }
+.stat-num { font-size: 1.5rem; font-weight: 600; color: var(--ink); }
+.stat-lbl { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+</style>
 </head>
 <body>
-  <div class="container">
-    <h1>🌟 Syncr4 管理画面</h1>
+<div class="shell">
+<header>
+  <div class="logo">Syncr4 <em>Admin</em></div>
+  <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#9ca3af">
+    <div class="status-dot" id="dot"></div>
+    <span id="status-txt">確認中…</span>
+  </div>
+</header>
 
-    <div class="form-group">
-      <label>管理者キー</label>
-      <input type="password" id="adminKey" placeholder="管理者キーを入力">
+<main>
+
+  <!-- Config -->
+  <div class="card">
+    <p class="card-title">⚙ 接続設定</p>
+    <div class="grid2">
+      <div class="field">
+        <label>Worker URL</label>
+        <input type="text" id="api-url" placeholder="https://spirituality-blog.syncr4.workers.dev" oninput="saveConfig()">
+      </div>
+      <div class="field">
+        <label>管理者キー</label>
+        <input type="password" id="admin-key" placeholder="wrangler secret で設定したキー" oninput="saveConfig()">
+      </div>
     </div>
-
-    <div class="form-group">
-      <label>タイトル</label>
-      <input type="text" id="title" placeholder="記事タイトル">
+    <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">
+      <span class="cfg-tag" id="cfg-url">URL 未設定</span>
+      <span class="cfg-tag" id="cfg-key">Key 未設定</span>
     </div>
-
-    <div class="form-group">
-      <label>スラッグ（URL用）</label>
-      <input type="text" id="slug" placeholder="article-slug">
-    </div>
-
-    <div class="form-group">
-      <label>説明文</label>
-      <input type="text" id="description" placeholder="記事の説明文（meta description）">
-    </div>
-
-    <div class="form-group">
-      <label>本文（HTML可）</label>
-      <textarea id="content" placeholder="記事本文を入力..."></textarea>
-    </div>
-
-    <button onclick="submitArticle()">記事を投稿</button>
-    <div id="msg"></div>
   </div>
 
-  <script>
-    async function submitArticle() {
-      const adminKey = document.getElementById('adminKey').value;
-      const title = document.getElementById('title').value;
-      const slug = document.getElementById('slug').value;
-      const description = document.getElementById('description').value;
-      const content = document.getElementById('content').value;
-      const msg = document.getElementById('msg');
+  <!-- Stats -->
+  <div class="card">
+    <p class="card-title">📊 統計</p>
+    <div class="stats">
+      <div class="stat"><div class="stat-num" id="s-total">—</div><div class="stat-lbl">総記事数</div></div>
+      <div class="stat"><div class="stat-num" id="s-session">0</div><div class="stat-lbl">今回生成</div></div>
+      <div class="stat"><div class="stat-num" id="s-queue">0</div><div class="stat-lbl">キュー残数</div></div>
+    </div>
+  </div>
 
-      if (!adminKey || !title || !slug || !content) {
-        msg.className = 'msg error';
-        msg.textContent = '管理者キー・タイトル・スラッグ・本文は必須です。';
-        return;
-      }
+  <!-- Generator -->
+  <div class="card">
+    <p class="card-title">✍ 記事生成</p>
 
-      try {
-        const res = await fetch('/api/articles', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Admin-Key': adminKey
-          },
-          body: JSON.stringify({ title, slug, description, content })
-        });
+    <div class="field">
+      <label>記事タイトル一覧（1行1タイトル）</label>
+      <textarea id="titles" rows="10" placeholder="魂の目覚めとは何か&#10;引き寄せの法則を実践する方法&#10;瞑想で内なる平和を見つける&#10;..."></textarea>
+    </div>
 
-        const data = await res.json();
+    <div class="grid2">
+      <div class="field">
+        <label>ジャンル</label>
+        <select id="genre">
+          <option>スピリチャル・精神世界</option>
+          <option>瞑想・マインドフルネス</option>
+          <option>引き寄せの法則</option>
+          <option>ヒーリング・エネルギー</option>
+          <option>魂・使命・覚醒</option>
+          <option>チャクラ・オーラ</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>文体</label>
+        <select id="tone">
+          <option>親しみやすくカジュアルに</option>
+          <option>わかりやすく丁寧に</option>
+          <option>データ重視で信頼感を出して</option>
+          <option>体験談ベースで共感を呼ぶように</option>
+        </select>
+      </div>
+    </div>
 
-        if (res.ok) {
-          msg.className = 'msg success';
-          msg.textContent = '✅ 記事を投稿しました！';
-          document.getElementById('title').value = '';
-          document.getElementById('slug').value = '';
-          document.getElementById('description').value = '';
-          document.getElementById('content').value = '';
-        } else {
-          msg.className = 'msg error';
-          msg.textContent = `❌ エラー: ${data.error}`;
-        }
-      } catch (err) {
-        msg.className = 'msg error';
-        msg.textContent = `❌ 通信エラー: ${err.message}`;
-      }
+    <div style="display:grid;grid-template-columns:1fr auto;gap:8px">
+    <button class="btn btn-primary btn-full" id="gen-btn" onclick="startGeneration()" style="height:44px;font-size:15px;">記事を一括生成して公開</button>
+    <button onclick="clearAll()" style="height:44px;padding:0 16px;border-radius:8px;border:1px solid #dddbd5;background:none;font-family:inherit;font-size:13px;color:#888;cursor:pointer" title="タイトルとログをクリア">🗑 クリア</button>
+    </div>
+
+    <div class="progress-wrap" id="prog-wrap">
+      <div class="prog-bar-bg"><div class="prog-bar" id="prog-bar"></div></div>
+      <div class="prog-info">
+        <span id="prog-label">準備中…</span>
+        <span id="prog-count">0 / 0</span>
+      </div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── CONFIG (localStorage) ── */
+const CFG_KEY = 'syncr4_admin_config';
+function loadConfig() {
+  const c = JSON.parse(localStorage.getItem(CFG_KEY) || '{}');
+  if (c.url) document.getElementById('api-url').value = c.url;
+  if (c.key) document.getElementById('admin-key').value = c.key;
+  updateCfgTags();
+}
+function saveConfig() {
+  const url = document.getElementById('api-url').value.trim();
+  const key = document.getElementById('admin-key').value.trim();
+  localStorage.setItem(CFG_KEY, JSON.stringify({ url, key }));
+  updateCfgTags();
+}
+function getConfig() {
+  return JSON.parse(localStorage.getItem(CFG_KEY) || '{}');
+}
+function updateCfgTags() {
+  const { url, key } = getConfig();
+  const cu = document.getElementById('cfg-url');
+  const ck = document.getElementById('cfg-key');
+  cu.textContent = url ? '✓ URL 設定済み' : 'URL 未設定';
+  cu.className   = 'cfg-tag' + (url ? ' set' : '');
+  ck.textContent = key ? '✓ Key 設定済み' : 'Key 未設定';
+  ck.className   = 'cfg-tag' + (key ? ' set' : '');
+}
+
+/* ── HEALTH CHECK ── */
+async function checkHealth() {
+  const { url } = getConfig();
+  if (!url) { setStatus(false, '未接続'); return; }
+  try {
+    const r = await fetch(url + '/api/health');
+    const d = await r.json();
+    setStatus(d.ok, d.ok ? 'API 接続中' : 'エラー');
+    if (d.ok) fetchStats();
+  } catch { setStatus(false, '接続失敗'); }
+}
+function setStatus(ok, txt) {
+  document.getElementById('dot').style.background = ok ? '#4ade80' : '#f87171';
+  document.getElementById('status-txt').textContent = txt;
+}
+
+/* ── STATS ── */
+let sessionCount = 0;
+async function fetchStats() {
+  const { url } = getConfig();
+  if (!url) return;
+  try {
+    const r = await fetch(url + '/api/articles?limit=200');
+    const d = await r.json();
+    document.getElementById('s-total').textContent = d.total ?? '—';
+  } catch {}
+}
+
+/* ── LOG ── */
+function addLog(msg, type = 'inf') {
+  const el = document.getElementById('log');
+  const line = document.createElement('div');
+  line.className = type;
+  line.textContent = msg;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+/* ── TOAST ── */
+function toast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + type + ' show';
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+/* ── GENERATE ── */
+async function startGeneration() {
+  const { url, key } = getConfig();
+  if (!url || !key) { toast('接続設定を入力してください', 'error'); return; }
+
+  const raw    = document.getElementById('titles').value.trim();
+  const titles = raw.split('\n').map(s => s.trim()).filter(Boolean);
+  if (!titles.length) { toast('タイトルを入力してください', 'error'); return; }
+
+  const genre = document.getElementById('genre').value;
+  const tone  = document.getElementById('tone').value;
+
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true; btn.textContent = '生成中…';
+
+  const pw = document.getElementById('prog-wrap');
+  pw.classList.add('show');
+  document.getElementById('log').innerHTML = '';
+
+  let done = 0;
+  document.getElementById('s-queue').textContent = titles.length;
+
+  for (const title of titles) {
+    document.getElementById('prog-label').textContent = title.length > 30 ? title.slice(0,30)+'…' : title;
+    document.getElementById('prog-count').textContent = `${done} / ${titles.length}`;
+    document.getElementById('prog-bar').style.width = (done / titles.length * 100) + '%';
+    addLog(`▶ ${title}`, 'inf');
+
+    try {
+      /* Step 1: Anthropic でコンテンツ生成 */
+      const article = await generateWithAI(title, genre, tone);
+
+      /* Step 2: Worker API に投稿 → D1 に保存 */
+      const res = await fetch(url + '/api/articles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Key': key },
+        body: JSON.stringify(article),
+      });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+
+      done++;
+      sessionCount++;
+      document.getElementById('s-session').textContent = sessionCount;
+      document.getElementById('s-queue').textContent   = titles.length - done;
+      addLog(`✓ 公開完了: ${title}`, 'ok');
+
+    } catch (e) {
+      addLog(`✗ エラー: ${title} — ${e.message}`, 'err');
     }
-  </script>
+
+    await new Promise(r => setTimeout(r, 400));
+  }
+
+  document.getElementById('prog-bar').style.width   = '100%';
+  document.getElementById('prog-label').textContent = '完了！';
+  document.getElementById('prog-count').textContent = `${done} / ${titles.length}`;
+  addLog(`─── ${done}件 完了、${titles.length - done}件 失敗 ───`, 'ok');
+
+  btn.disabled = false;
+  btn.textContent = '記事を一括生成して公開';
+  fetchStats();
+  toast(`${done}件の記事を公開しました`);
+}
+
+async function generateWithAI(title, genre, tone) {
+  const { url, key } = getConfig();
+
+  const prompt = `あなたはプロのブログライターです。以下の構成で記事を書いてください。
+
+タイトル：${title}
+ジャンル：${genre}
+文体：${tone}
+
+【記事構成】
+1. 冒頭（読者の悩みに共感、この記事でわかること3〜5個を箇条書き）
+2. 結論の先出し（1〜2文）
+3. 本文（ステップ形式または体験談形式、具体的な数字やツール名）
+4. 注意点・失敗パターン
+5. まとめ＋次のアクション
+
+【出力形式】
+JSONやマークダウンのコードブロックは使わず、以下の形式で「===TAGS===」という区切り文字を使って出力してください。それ以外の文字（前置き・あいさつ・説明）は一切書かないこと。
+
+（ここに記事本文をHTMLタグで記述。h2, h3, p, ul, li, strong タグ使用可。1500〜2000文字程度）
+===TAGS===
+タグ1,タグ2,タグ3,タグ4,タグ5`;
+
+  /* Worker経由でAnthropic APIを呼ぶ（ブラウザのCORS制限を回避） */
+  const res = await fetch(url + '/api/generate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Key': key },
+    body: JSON.stringify({ prompt }),
+  });
+  if (!res.ok) throw new Error('Generate API ' + res.status);
+  const data = await res.json();
+  const text = data.content.map(c => c.text || '').join('');
+
+  const parts = text.split('===TAGS===');
+  const body = parts[0].replace(/```html|```/g, '').trim();
+  const tagsRaw = (parts[1] || '').trim();
+  const tags = tagsRaw
+    .split(/[,、\n]/)
+    .map(t => t.replace(/[「」"'\s]/g, '').trim())
+    .filter(Boolean)
+    .slice(0, 6);
+
+  if (!body) throw new Error('記事本文の取得に失敗しました');
+
+  return { title, genre, body, tags };
+}
+
+function clearAll() {
+  document.getElementById("titles").value = "";
+  document.getElementById("log").innerHTML = "";
+  document.getElementById("prog-wrap").classList.remove("show");
+  document.getElementById("prog-bar").style.width = "0%";
+  document.getElementById("prog-label").textContent = "準備中…";
+  document.getElementById("prog-count").textContent = "0 / 0";
+  document.getElementById("s-session").textContent = "0";
+  document.getElementById("s-queue").textContent = "0";
+  sessionCount = 0;
+}
+
+/* ── INIT ── */
+loadConfig();
+checkHealth();
+setInterval(checkHealth, 30000);
+</script>
 </body>
 </html>

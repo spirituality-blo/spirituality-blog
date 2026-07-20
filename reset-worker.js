@@ -1,4 +1,6 @@
-/**
+﻿const fs = require('fs');
+
+const worker = `/**
  * Spirituality Blog — Cloudflare Worker API
  */
 
@@ -53,7 +55,7 @@ export default {
     }
 
     // 記事1件
-    const detailMatch = path.match(/^\/api\/articles\/(\d+)$/);
+    const detailMatch = path.match(/^\\/api\\/articles\\/(\\d+)$/);
     if (detailMatch && request.method === 'GET') {
       const id = detailMatch[1];
       const row = await env.DB
@@ -121,3 +123,7 @@ export default {
     return err('Not found', 404);
   },
 };
+`;
+
+fs.writeFileSync('src/worker.js', worker, 'utf8');
+console.log('Done!');
