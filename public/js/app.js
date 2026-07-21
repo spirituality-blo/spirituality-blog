@@ -1,4 +1,4 @@
-const API_BASE = '/api';
+﻿const API_BASE = 'https://syncr4-api.syncr4.workers.dev/api';
 
 function getIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
@@ -16,7 +16,7 @@ async function showArticleList() {
     const articles = await res.json();
 
     if (!articles.length) {
-      list.innerHTML = '<p class="loading">記事はまだありません。</p>';
+      list.innerHTML = '<p class="loading">è¨˜äº‹ã¯ã¾ã ã‚ã‚Šã¾ã›ã‚“ã€‚</p>';
       return;
     }
 
@@ -32,7 +32,7 @@ async function showArticleList() {
       </div>
     `;
   } catch (err) {
-    list.innerHTML = '<p class="loading">読み込みに失敗しました。</p>';
+    list.innerHTML = '<p class="loading">èª­ã¿è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸã€‚</p>';
     console.error(err);
   }
 }
@@ -51,19 +51,19 @@ async function showArticleDetail(id) {
 
     detail.innerHTML = `
       <div class="article-content">
-        <a href="/" class="back-link">← 記事一覧に戻る</a>
+        <a href="/" class="back-link">â† è¨˜äº‹ä¸€è¦§ã«æˆ»ã‚‹</a>
         <h1>${article.title}</h1>
         <p class="date">${new Date(article.created_at).toLocaleDateString('ja-JP')}</p>
         <div class="content-body">${article.content || ''}</div>
       </div>
     `;
   } catch (err) {
-    detail.innerHTML = '<p class="loading">記事の読み込みに失敗しました。</p>';
+    detail.innerHTML = '<p class="loading">è¨˜äº‹ã®èª­ã¿è¾¼ã¿ã«å¤±æ•—ã—ã¾ã—ãŸã€‚</p>';
     console.error(err);
   }
 }
 
-// ルーティング
+// ãƒ«ãƒ¼ãƒ†ã‚£ãƒ³ã‚°
 function route() {
   const id = getIdFromUrl();
   if (id) {
