@@ -13,7 +13,8 @@ async function showArticleList() {
 
   try {
     const res = await fetch(`${API_BASE}/articles`);
-    const articles = await res.json();
+    const data = await res.json();
+  const articles = data.articles || [];
 
     if (!articles.length) {
       list.innerHTML = '<p class="loading">è¨˜äº‹ã¯ã¾ã ã‚ã‚Šã¾ã›ã‚“ã€‚</p>';
@@ -75,3 +76,4 @@ function route() {
 
 window.addEventListener('popstate', route);
 route();
+
