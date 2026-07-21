@@ -1,31 +1,625 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Syncr4 - スピリチャルブログ</title>
-  <meta name="description" content="心と魂の成長を探求するスピリチャルブログ">
-  <link rel="stylesheet" href="/styles/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MEMO — ブログ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── DESIGN TOKENS ─────────────────────────────────────────── */
+/* ジャンル変更はここ1行だけ変える */
+:root {
+  --accent:        #1a1a1a;
+  --accent-tint:   #f5f5f5;
+  --accent-mid:    #555;
+
+  --ink:           #111;
+  --ink-2:         #444;
+  --ink-3:         #888;
+  --ink-4:         #bbb;
+  --paper:         #ffffff;
+  --paper-2:       #f8f8f6;
+  --paper-3:       #f0efec;
+  --rule:          #e8e8e4;
+
+  --serif:         'DM Serif Display', Georgia, serif;
+  --sans:          'Inter', -apple-system, sans-serif;
+
+  --max:           1100px;
+  --gutter:        clamp(1.25rem, 5vw, 3rem);
+  --radius:        6px;
+  --transition:    0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── RESET ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; cursor: pointer; }
+
+/* ── PAGE ROUTING ───────────────────────────────────────────── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── NAVIGATION ─────────────────────────────────────────────── */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--rule);
+}
+.nav-inner {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo {
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  cursor: pointer;
+}
+.logo span {
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  margin-left: 2px;
+  vertical-align: middle;
+  position: relative; top: -2px;
+}
+.nav-links { display: flex; align-items: center; gap: 2rem; }
+.nav-link {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-3);
+  letter-spacing: 0.03em;
+  background: none;
+  border: none;
+  transition: color var(--transition);
+  padding: 0;
+}
+.nav-link:hover, .nav-link.active { color: var(--ink); }
+
+/* ── HOME / INDEX ────────────────────────────────────────────── */
+.home-wrap {
+  max-width: var(--max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+/* Hero strip */
+.hero {
+  padding: 5rem 0 4rem;
+  border-bottom: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 2rem;
+}
+.hero-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 1rem;
+}
+.hero-title {
+  font-family: var(--serif);
+  font-size: clamp(2.4rem, 6vw, 4.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  max-width: 14ch;
+}
+.hero-count {
+  text-align: right;
+}
+.hero-count .num {
+  font-family: var(--serif);
+  font-size: clamp(3rem, 8vw, 6rem);
+  line-height: 1;
+  color: var(--ink-4);
+  letter-spacing: -0.04em;
+}
+.hero-count .lbl {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-4);
+  margin-top: 4px;
+}
+
+/* Filter bar */
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid var(--rule);
+  flex-wrap: wrap;
+}
+.search-box {
+  flex: 1;
+  min-width: 200px;
+  position: relative;
+}
+.search-box input {
+  width: 100%;
+  height: 38px;
+  border: 1px solid var(--rule);
+  border-radius: 99px;
+  padding: 0 1rem 0 2.5rem;
+  font-family: var(--sans);
+  font-size: 13px;
+  color: var(--ink);
+  background: var(--paper-2);
+  outline: none;
+  transition: border-color var(--transition), background var(--transition);
+}
+.search-box input:focus { border-color: var(--ink-3); background: var(--paper); }
+.search-box::before {
+  content: '';
+  position: absolute;
+  left: 12px; top: 50%;
+  transform: translateY(-50%);
+  width: 14px; height: 14px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+.tag-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.tag-chip {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 99px;
+  border: 1px solid var(--rule);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-3);
+  background: none;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.tag-chip:hover { border-color: var(--ink-3); color: var(--ink-2); }
+.tag-chip.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+/* Article list — signature: left accent line + index number */
+.articles { padding: 0; }
+.article-row {
+  display: grid;
+  grid-template-columns: 56px 1fr auto;
+  align-items: start;
+  gap: 0 1.5rem;
+  padding: 1.75rem 0;
+  border-bottom: 1px solid var(--rule);
+  cursor: pointer;
+  transition: opacity var(--transition);
+  position: relative;
+}
+.article-row::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--accent);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+.article-row:hover::before { transform: scaleY(1); }
+.article-row:hover { opacity: 0.8; }
+
+.article-idx {
+  font-family: var(--serif);
+  font-size: 1.4rem;
+  color: var(--ink-4);
+  padding-top: 2px;
+  text-align: right;
+}
+.article-body { min-width: 0; }
+.article-genre {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 0.35rem;
+}
+.article-title {
+  font-size: clamp(1rem, 2.2vw, 1.2rem);
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin-bottom: 0.5rem;
+}
+.article-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 0.5rem; }
+.article-tag {
+  font-size: 11px;
+  color: var(--ink-3);
+  background: var(--paper-3);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.article-date {
+  font-size: 12px;
+  color: var(--ink-4);
+  white-space: nowrap;
+  padding-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Empty */
+.empty {
+  text-align: center;
+  padding: 6rem 0;
+  color: var(--ink-4);
+  font-size: 14px;
+}
+.empty-big {
+  font-family: var(--serif);
+  font-size: 3rem;
+  color: var(--ink-4);
+  opacity: 0.3;
+  margin-bottom: 1rem;
+}
+
+/* ── ARTICLE DETAIL ──────────────────────────────────────────── */
+.detail-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2.5rem var(--gutter) 6rem;
+}
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-3);
+  background: none;
+  border: none;
+  padding: 0;
+  margin-bottom: 2.5rem;
+  transition: color var(--transition);
+  letter-spacing: 0.02em;
+}
+.back-btn:hover { color: var(--ink); }
+.back-btn::before { content: '←'; font-size: 15px; }
+
+.detail-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 1.25rem;
+}
+.detail-genre {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  border: 1px solid var(--rule);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+.detail-date { font-size: 12px; color: var(--ink-4); }
+
+.detail-title {
+  font-family: var(--serif);
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  margin-bottom: 2rem;
+}
+.detail-divider {
+  height: 1px;
+  background: var(--rule);
+  margin: 0 0 2rem;
+}
+.detail-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 2.5rem;
+}
+.detail-tag {
+  font-size: 12px;
+  color: var(--ink-2);
+  border: 1px solid var(--rule);
+  padding: 4px 12px;
+  border-radius: 99px;
+}
+
+/* Article body prose */
+.prose { font-size: 16px; line-height: 1.85; color: var(--ink-2); }
+.prose h2 {
+  font-family: var(--serif);
+  font-size: 1.5rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  margin: 2.5rem 0 1rem;
+  line-height: 1.25;
+}
+.prose h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 2rem 0 0.75rem;
+  letter-spacing: 0.01em;
+}
+.prose p { margin-bottom: 1.25rem; }
+.prose ul, .prose ol { margin: 0 0 1.25rem 1.5rem; }
+.prose li { margin-bottom: 0.4rem; }
+.prose strong { font-weight: 600; color: var(--ink); }
+
+/* Home CTA at bottom of detail */
+.home-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 3.5rem;
+  padding: 0.75rem 1.5rem;
+  border: 1px solid var(--rule);
+  border-radius: 99px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-2);
+  background: none;
+  transition: all var(--transition);
+}
+.home-cta:hover {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+.home-cta-arrow { font-size: 16px; transition: transform var(--transition); }
+.home-cta:hover .home-cta-arrow { transform: translateX(-3px); }
+
+/* ── FOOTER ─────────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--rule);
+  margin-top: 4rem;
+  padding: 2rem var(--gutter);
+  max-width: var(--max);
+  margin-left: auto;
+  margin-right: auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--ink-4);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ── RESPONSIVE ─────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .hero { grid-template-columns: 1fr; }
+  .hero-count { text-align: left; }
+  .article-row { grid-template-columns: 40px 1fr; }
+  .article-date { display: none; }
+}
+</style>
+  <!-- AdSense/GA: syncr4.com用のID設定後にここへ追加 -->
 </head>
 <body>
-  <header>
-    <div class="header-inner">
-      <a href="/" class="site-title">🌟 Syncr4</a>
-      <p class="tagline">心と魂の成長を探求する</p>
-    </div>
-  </header>
 
-  <main id="main-content">
-    <div id="article-list">
-      <p class="loading">記事を読み込み中...</p>
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="logo" onclick="showPage('home')">MEMO<span></span></div>
+    <div class="nav-links">
+      <button class="nav-link active" id="nl-home" onclick="showPage('home')">記事</button>
+      <button class="nav-link" id="nl-about" onclick="alert('About ページは準備中です')">About</button>
     </div>
-    <div id="article-detail" style="display:none;"></div>
-  </main>
+  </div>
+</nav>
+
+<!-- ── HOME ── -->
+<div class="page active" id="page-home">
+  <div class="home-wrap">
+    <header class="hero">
+      <div>
+        <p class="hero-label">心と魂の成長を探求する</p>
+        <h1 class="hero-title">魂の目覚めと<br>気づきの記録。</h1>
+      </div>
+      <div class="hero-count">
+        <div class="num" id="hero-count">0</div>
+        <div class="lbl">Articles</div>
+      </div>
+    </header>
+
+    <div class="filter-bar">
+      <div class="search-box">
+        <input type="text" id="search" placeholder="記事を検索…" oninput="renderList()">
+      </div>
+      <div class="tag-row" id="tag-row"></div>
+    </div>
+
+    <div class="articles" id="articles-list"></div>
+  </div>
 
   <footer>
-    <p>&copy; 2025 Syncr4.com All rights reserved.</p>
+    <span>MEMO — AI-powered blog</span>
+    <span id="footer-count">0 articles</span>
   </footer>
+</div>
 
-  <script type="module" src="/js/app.js"></script>
+<!-- ── DETAIL ── -->
+<div class="page" id="page-detail">
+  <div class="detail-wrap">
+    <button class="back-btn" onclick="showPage('home')">一覧に戻る</button>
+    <div id="detail-content"></div>
+    <button class="home-cta" onclick="showPage('home')">
+      <span class="home-cta-arrow">←</span> ホームへ戻る
+    </button>
+  </div>
+</div>
+
+<script>
+/* -- STATE -- */
+const API_URL = 'https://syncr4-api.syncr4.workers.dev';
+let articles = [];
+let activeTag = '';
+const SITE_TITLE = 'MEMO ブログ';
+
+async function loadArticles() {
+  try {
+    const r = await fetch(API_URL + '/api/articles');
+    const d = await r.json();
+    articles = d.articles || [];
+  } catch (e) {
+    console.error('記事の取得に失敗しました', e);
+    articles = [];
+  }
+  renderList();
+  handleInitialRoute();
+}
+
+function showPage(name, push = true) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  ['home','about'].forEach(n => {
+    const el = document.getElementById('nl-' + n);
+    if (el) el.classList.toggle('active', n === name);
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (name === 'home') {
+    activeTag = '';
+    renderList();
+    document.title = SITE_TITLE;
+    if (push) history.pushState({ page: 'home' }, '', '/');
+    if (typeof gtag === 'function') gtag('event', 'page_view', { page_location: window.location.href, page_title: SITE_TITLE });
+  }
+}
+
+function handleInitialRoute() {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  if (id) { showDetail(id, false); }
+}
+
+window.addEventListener('popstate', () => {
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get('id');
+  if (id) { showDetail(id, false); } else { showPage('home', false); }
+});
+
+function renderList() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const filtered = articles.filter(a => {
+    const mq = !q || a.title.toLowerCase().includes(q) || (a.tags||[]).join(' ').toLowerCase().includes(q);
+    const mt = !activeTag || (a.tags||[]).includes(activeTag);
+    return mq && mt;
+  });
+
+  document.getElementById('hero-count').textContent = articles.length;
+  document.getElementById('footer-count').textContent = articles.length + ' articles';
+
+  const allTags = [...new Set(articles.flatMap(a => a.tags||[]))].slice(0, 16);
+  const tagRow = document.getElementById('tag-row');
+  tagRow.innerHTML = '';
+  allTags.forEach(t => {
+    const btn = document.createElement('button');
+    btn.className = 'tag-chip' + (t === activeTag ? ' on' : '');
+    btn.textContent = t;
+    btn.onclick = () => { activeTag = activeTag === t ? '' : t; renderList(); };
+    tagRow.appendChild(btn);
+  });
+
+  const list = document.getElementById('articles-list');
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty"><div class="empty-big">*</div>記事が見つかりませんでした</div>';
+    return;
+  }
+  list.innerHTML = '';
+  filtered.forEach((a, i) => {
+    const row = document.createElement('div');
+    row.className = 'article-row';
+    const tagsHtml = (a.tags||[]).slice(0,5).map(t => '<span class="article-tag">' + t + '</span>').join('');
+    row.innerHTML = '<div class="article-idx">' + String(i+1).padStart(2,'0') + '</div>' +
+      '<div class="article-body">' +
+        '<span class="article-genre">' + a.genre + '</span>' +
+        '<div class="article-title">' + a.title + '</div>' +
+        '<div class="article-tags">' + tagsHtml + '</div>' +
+      '</div>' +
+      '<div class="article-date">' + formatDate(a.created_at) + '</div>';
+    row.onclick = () => showDetail(a.id);
+    list.appendChild(row);
+  });
+}
+
+async function showDetail(id, push = true) {
+  showPage('detail', false);
+  document.getElementById('detail-content').innerHTML = '<p style="color:var(--ink-4);font-size:13px">読み込み中…</p>';
+
+  let a;
+  try {
+    const r = await fetch(API_URL + '/api/articles/' + id);
+    a = await r.json();
+  } catch (e) {
+    document.getElementById('detail-content').innerHTML = '<p style="color:var(--ink-4);font-size:13px">記事の読み込みに失敗しました</p>';
+    return;
+  }
+
+  const tagsHtml = (a.tags||[]).map(t => '<span class="detail-tag">' + t + '</span>').join('');
+  document.getElementById('detail-content').innerHTML =
+    '<div class="detail-eyebrow">' +
+      '<span class="detail-genre">' + a.genre + '</span>' +
+      '<span class="detail-date">' + formatDate(a.created_at) + '</span>' +
+    '</div>' +
+    '<h1 class="detail-title">' + a.title + '</h1>' +
+    '<div class="detail-divider"></div>' +
+    '<div class="detail-tags">' + tagsHtml + '</div>' +
+    '<div class="prose">' + a.body + '</div>' +
+  '<div class="detail-ad" style="margin:32px 0;text-align:center;">' +
+    '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-8227826440760549" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>' +
+  '</div>';
+
+  try { (adsbygoogle = window.adsbygoogle || []).push({}); } catch(e) {}
+
+  document.title = a.title + ' | MEMO';
+  if (push) history.pushState({ page: 'detail', id }, '', '?id=' + id);
+  if (typeof gtag === 'function') gtag('event', 'page_view', { page_location: window.location.href, page_title: a.title });
+}
+
+function formatDate(raw) {
+  if (!raw) return '';
+  if (raw.includes('年') && raw.includes('月')) return raw;
+  const d = new Date(raw.replace(' ', 'T'));
+  if (isNaN(d)) return raw;
+  return d.getFullYear() + '年' + (d.getMonth()+1) + '月' + d.getDate() + '日';
+}
+
+loadArticles();
+</script>
 </body>
 </html>
+
+
