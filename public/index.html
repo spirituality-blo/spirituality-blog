@@ -427,7 +427,13 @@ footer {
   .article-date { display: none; }
 }
 </style>
-  <!-- AdSense/GA: syncr4.com用のID設定後にここへ追加 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RC10NVP902"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-RC10NVP902', { send_page_view: false });
+  </script>
 </head>
 <body>
 
@@ -621,5 +627,6 @@ loadArticles();
 </script>
 </body>
 </html>
+
 
 
